@@ -1,6 +1,7 @@
 package com.chenjunquan.mingrinews.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -35,8 +36,16 @@ public class GuideActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_guide);
-        viewpager =findViewById(R.id.viewpager);
-        bt_start= findViewById(R.id.bt_start);
+        viewpager = findViewById(R.id.viewpager);
+        bt_start = findViewById(R.id.bt_start);
+        bt_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(GuideActivity.this, MainActivity.class);
+                startActivity(intent);
+
+            }
+        });
         ll_point_group = findViewById(R.id.ll_point_group);
         iv_red_point = findViewById(R.id.iv_red_point);
         ids = new int[]{R.drawable.guide_1, R.drawable.guide_2, R.drawable.guide_3};
@@ -66,18 +75,19 @@ public class GuideActivity extends Activity {
         //得到屏幕滑动的百分比
         viewpager.addOnPageChangeListener(new MyOnPageChangeListener());
     }
-    class MyOnPageChangeListener implements ViewPager.OnPageChangeListener{
+
+    class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            Log.i("positionOffset",positionOffset+"");
-            Log.i("positionOffsetPixels",positionOffsetPixels+"");
+            Log.i("positionOffset", positionOffset + "");
+            Log.i("positionOffsetPixels", positionOffsetPixels + "");
 
             //红点间移动的距离=屏幕移动百分比*两点间距
             //但是红点的左边距=红点间移动的距离+之前的距离
-            int leftmargin= (int) (positionOffset*leftmax)+position*leftmax;
+            int leftmargin = (int) (positionOffset * leftmax) + position * leftmax;
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) iv_red_point.getLayoutParams();
-            params.leftMargin=leftmargin;
+            params.leftMargin = leftmargin;
             iv_red_point.setLayoutParams(params);
         }
 
@@ -91,16 +101,18 @@ public class GuideActivity extends Activity {
 
         }
     }
-    class MyOnGloBalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener{
+
+    class MyOnGloBalLayoutListener implements ViewTreeObserver.OnGlobalLayoutListener {
 
         @Override
         public void onGlobalLayout() {
             //多次执行 需要移除
             iv_red_point.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             leftmax = ll_point_group.getChildAt(1).getLeft() - ll_point_group.getChildAt(0).getLeft();
-            Log.i("onGlobalLayout",leftmax+"");
+            Log.i("onGlobalLayout", leftmax + "");
         }
     }
+
     class MyPagerAdapter extends PagerAdapter {
 
         @Override

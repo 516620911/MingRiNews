@@ -23,7 +23,7 @@ public class SplashActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_splash);
         rl_splash_root = findViewById(R.id.rl_splash_root);
         //渐变动画
         AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
