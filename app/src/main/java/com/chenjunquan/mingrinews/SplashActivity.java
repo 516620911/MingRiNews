@@ -11,6 +11,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.RelativeLayout;
 
 import com.chenjunquan.mingrinews.activity.GuideActivity;
+import com.chenjunquan.mingrinews.activity.MainActivity;
 import com.chenjunquan.mingrinews.utils.CacheUtil;
 
 public class SplashActivity extends Activity {
@@ -52,10 +53,13 @@ public class SplashActivity extends Activity {
                 boolean isStartMain = CacheUtil.getBoolean(getApplicationContext(), START_MAIN);
                 if (isStartMain) {
                     //直接进入主页面
+                    Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                    startActivity(intent);
                 } else {
-                    //引动页面
+                    //引导页面
                     Intent intent = new Intent(SplashActivity.this, GuideActivity.class);
                     startActivity(intent);
+                    CacheUtil.putBoolean(getApplicationContext(), START_MAIN, true);
                 }
                 //关闭当前页面
                 finish();

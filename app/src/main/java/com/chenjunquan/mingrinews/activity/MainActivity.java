@@ -32,7 +32,7 @@ public class MainActivity extends SlidingFragmentActivity {
         //设置显示的模式:左侧菜单+主页;左侧菜单+主页+右侧;主页+右侧
         slidingMenu.setMode(SlidingMenu.LEFT);
         //设置滑动模式:滑动边缘,全屏滑动,禁止滑动
-        slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+        slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
         //设置主页占据的宽度
         slidingMenu.setBehindOffset(DensityUtil.dip2px(getApplicationContext(), 270));
 
@@ -41,7 +41,7 @@ public class MainActivity extends SlidingFragmentActivity {
     }
 
     private void initFragment() {
-        //动态添加fragment到指定布局
+        //动态添加fragment到指定布局?
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         //add是在原来的基础叠加一个Fragment
