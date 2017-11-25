@@ -35,6 +35,7 @@ public class ContentFragment extends BaseFragment {
     //五个页面的集合
     private ArrayList<BasePager> mBasePagers;
 
+
     @Override
     public View initView() {
         LogUtil.e("ContentFragmentinitView");
@@ -68,6 +69,11 @@ public class ContentFragment extends BaseFragment {
         rg_main.check(R.id.rb_home);
         mBasePagers.get(0).initData();
     }
+
+    public NewsCenterPager getNewsCenterPager() {
+        return (NewsCenterPager) mBasePagers.get(1);
+    }
+
     class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
 
         @Override

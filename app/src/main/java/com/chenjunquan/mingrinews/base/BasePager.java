@@ -7,6 +7,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.chenjunquan.mingrinews.R;
+import com.chenjunquan.mingrinews.activity.MainActivity;
 
 /**
  * 基类公共类
@@ -24,7 +25,7 @@ public class BasePager {
     public TextView tv_title;
     public ImageButton iv_menu;
     public FrameLayout fl_content_content;
-
+    public ImageButton ib_menu;
     public BasePager(Context context) {
         mContext = context;
         //构造方法一执行就初始化视图
@@ -37,7 +38,16 @@ public class BasePager {
         tv_title = view.findViewById(R.id.tv_title);
         iv_menu = view.findViewById(R.id.ib_menu);
         fl_content_content = view.findViewById(R.id.fl_content_content);
-
+        ib_menu=view.findViewById(R.id.ib_menu);
+        ib_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //关闭左侧菜单
+                MainActivity mainActivity= (MainActivity) mContext;
+                //开关状态互换
+                mainActivity.getSlidingMenu().toggle();
+            }
+        });
         return view;
     }
 

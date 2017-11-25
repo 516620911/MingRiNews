@@ -28,4 +28,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation project(':SlidingMenu_library')
     compile 'org.xutils:xutils:3.5.0'
+    compile 'com.google.code.gson:gson:2.8.2'
+    implementation project(':ViewPagerIndicator_library')
 }

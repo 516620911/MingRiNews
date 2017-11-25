@@ -3,6 +3,7 @@ package com.chenjunquan.mingrinews.activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.Window;
 
 import com.chenjunquan.mingrinews.R;
 import com.chenjunquan.mingrinews.fragment.ContentFragment;
@@ -18,10 +19,12 @@ public class MainActivity extends SlidingFragmentActivity {
 
     public static final String MAIN_CONTENT_TAG = "main_content_tag";
     public static final String LEFTMENU_TAG = "leftmenu_tag";
+    private LeftmenuFragment mLeftmenuFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         //设置内容主页面
         setContentView(R.layout.activity_main);
         //设置左侧抽屉菜单
@@ -34,7 +37,7 @@ public class MainActivity extends SlidingFragmentActivity {
         //设置滑动模式:滑动边缘,全屏滑动,禁止滑动
         slidingMenu.setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
         //设置主页占据的宽度
-        slidingMenu.setBehindOffset(DensityUtil.dip2px(getApplicationContext(), 270));
+        slidingMenu.setBehindOffset(DensityUtil.dip2px(getApplicationContext(), 250));
 
         //初始化Fragment
         initFragment();
@@ -49,5 +52,17 @@ public class MainActivity extends SlidingFragmentActivity {
         transaction.replace(R.id.fl_content, new ContentFragment(), MAIN_CONTENT_TAG);
         transaction.replace(R.id.fl_leftmenu, new LeftmenuFragment(), LEFTMENU_TAG);
         transaction.commit();
+    }
+
+    /**
+     * @return 左侧菜单实例
+     */
+    public LeftmenuFragment getLeftmenuFragment() {
+        return (LeftmenuFragment) getSupportFragmentManager().findFragmentByTag(LEFTMENU_TAG);
+    }
+
+    public ContentFragment getContentFragment() {
+        return (ContentFragment) getSupportFragmentManager().findFragmentByTag(MAIN_CONTENT_TAG);
+
     }
 }

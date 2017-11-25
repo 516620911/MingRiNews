@@ -22,4 +22,15 @@ public class CacheUtil {
         edit.putBoolean(key, value);
         edit.commit();
     }
+    public static String getString(Context context, String key) {
+        SharedPreferences sp = context.getSharedPreferences(String.valueOf(R.string.app_name), Context.MODE_PRIVATE);
+        return sp.getString(key, null);
+    }
+
+    public static void putString(Context context, String key, String value) {
+        SharedPreferences sp = context.getSharedPreferences(String.valueOf(R.string.app_name), Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putString(key, value);
+        edit.commit();
+    }
 }
