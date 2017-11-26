@@ -5,9 +5,10 @@
       <module fileurl="file://$PROJECT_DIR$/MingRiNews.iml" filepath="$PROJECT_DIR$/MingRiNews.iml" />
       <module fileurl="file://$PROJECT_DIR$/SlidingMenu_library/SlidingMenu_library.iml" filepath="$PROJECT_DIR$/SlidingMenu_library/SlidingMenu_library.iml" />
       <module fileurl="file://$PROJECT_DIR$/ViewPagerIndicator_library/ViewPagerIndicator_library.iml" filepath="$PROJECT_DIR$/ViewPagerIndicator_library/ViewPagerIndicator_library.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ViewPagerIndicator_sample/ViewPagerIndicator_sample.iml" filepath="$PROJECT_DIR$/ViewPagerIndicator_sample/ViewPagerIndicator_sample.iml" />
+      <module fileurl="file://G:\Workspaces\AndroidStudio\MingRiNews\ViewPagerIndicator_library\ViewPagerIndicator_library.iml" filepath="G:\Workspaces\AndroidStudio\MingRiNews\ViewPagerIndicator_library\ViewPagerIndicator_library.iml" />
+      <module fileurl="file://G:\Workspaces\AndroidStudio\MingRiNews\ViewPagerIndicator_sample\ViewPagerIndicator_sample.iml" filepath="G:\Workspaces\AndroidStudio\MingRiNews\ViewPagerIndicator_sample\ViewPagerIndicator_sample.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
+      <module fileurl="file://G:\Workspaces\AndroidStudio\MingRiNews\library\library.iml" filepath="G:\Workspaces\AndroidStudio\MingRiNews\library\library.iml" />
     </modules>
   </component>
 </project>

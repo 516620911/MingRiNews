@@ -3,13 +3,17 @@ package com.chenjunquan.mingrinews.menudetailpager;
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import com.chenjunquan.mingrinews.R;
+import com.chenjunquan.mingrinews.activity.MainActivity;
 import com.chenjunquan.mingrinews.base.MenuDetailBasePager;
 import com.chenjunquan.mingrinews.domain.NewsCenterPagerBean;
 import com.chenjunquan.mingrinews.menudetailpager.tabdetailpagers.TabDetailPager;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.viewpagerindicator.TabPageIndicator;
 
 import org.xutils.view.annotation.ViewInject;
@@ -28,6 +32,8 @@ public class NewsMenuDetailPager extends MenuDetailBasePager {
     private TabPageIndicator tabPageIndicator;
     @ViewInject(R.id.viewpager)
     private ViewPager viewpager;
+    @ViewInject(R.id.ib_tab_next)
+    private ImageButton ib_tab_next;
     private List<NewsCenterPagerBean.DataBean.ChildrenData> children;
     /**
      * 页签页面的集合
@@ -43,6 +49,12 @@ public class NewsMenuDetailPager extends MenuDetailBasePager {
     public View initView() {
         View view = View.inflate(mContext, R.layout.newsmenu_detail_pager, null);
         x.view().inject(this, view);
+        ib_tab_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewpager.setCurrentItem(viewpager.getCurrentItem() + 1);
+            }
+        });
         return view;
     }
 
@@ -56,11 +68,37 @@ public class NewsMenuDetailPager extends MenuDetailBasePager {
         //绑定ViewPager和TabPagerIndicator
         tabPageIndicator.setViewPager(viewpager);
         //绑定后使用TabPagerIndicator监听
+        tabPageIndicator.setOnPageChangeListener(new MyOnPageChangeListener());
+    }
+    class MyOnPageChangeListener implements ViewPager.OnPageChangeListener{
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            if(position==0){
+                //slidingMenu可以全屏滑动
+                MainActivity mainActivity= (MainActivity) mContext;
+                mainActivity.getSlidingMenu().setTouchModeAbove(SlidingMenu.TOUCHMODE_FULLSCREEN);
+            }else{
+                MainActivity mainActivity= (MainActivity) mContext;
+                mainActivity.getSlidingMenu().setTouchModeAbove(SlidingMenu.TOUCHMODE_NONE);
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
     }
 
     class MyNewsMenuDetailPagerAdapter extends PagerAdapter {
         @Override
         public CharSequence getPageTitle(int position) {
+            Log.i("getPageTitle", children.get(position).getTitle());
             return children.get(position).getTitle();
         }
 

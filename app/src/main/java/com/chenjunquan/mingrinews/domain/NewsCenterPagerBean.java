@@ -65,6 +65,21 @@ public class NewsCenterPagerBean {
         private String weekurl;
         private List<ChildrenData> children;
 
+        @Override
+        public String toString() {
+            return "DataBean{" +
+                    "id=" + id +
+                    ", title='" + title + '\'' +
+                    ", type=" + type +
+                    ", url='" + url + '\'' +
+                    ", url1='" + url1 + '\'' +
+                    ", excurl='" + excurl + '\'' +
+                    ", dayurl='" + dayurl + '\'' +
+                    ", weekurl='" + weekurl + '\'' +
+                    ", children=" + children +
+                    '}';
+        }
+
         public int getId() {
             return id;
         }
