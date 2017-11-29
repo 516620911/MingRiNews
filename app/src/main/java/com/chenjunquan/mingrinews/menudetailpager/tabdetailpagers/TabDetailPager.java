@@ -4,14 +4,13 @@ import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chenjunquan.mingrinews.R;
 import com.chenjunquan.mingrinews.base.MenuDetailBasePager;
@@ -19,6 +18,8 @@ import com.chenjunquan.mingrinews.domain.NewsCenterPagerBean;
 import com.chenjunquan.mingrinews.domain.TabDetailPagerBean;
 import com.chenjunquan.mingrinews.utils.CacheUtil;
 import com.chenjunquan.mingrinews.utils.Constants;
+import com.chenjunquan.mingrinews.view.HorizontalSrollViewPager;
+import com.chenjunquan.mingrinews.view.RefreshListView;
 import com.google.gson.Gson;
 
 import org.xutils.common.Callback;
@@ -42,14 +43,17 @@ public class TabDetailPager extends MenuDetailBasePager {
      * 顶置viewpager新闻
      */
     private List<TabDetailPagerBean.DataEntity.TopnewsData> topnews;
-    private ViewPager viewpager;
+    private HorizontalSrollViewPager viewpager;
     private TextView tv_title;
     private LinearLayout ll_point_group;
-    private ListView listview;
+    private RefreshListView listview;
     private int prePosition = 0;
     private List<TabDetailPagerBean.DataEntity.NewsData> news;
     private MyTabDetailPagerListAdapter listAdapter;
     private ImageOptions imageOptions;
+    private String url;
+    private String moreUrl;
+    private boolean isLoadMore = false;
 
 
     public TabDetailPager(Context context, NewsCenterPagerBean.DataBean.ChildrenData childrenData) {
@@ -72,33 +76,85 @@ public class TabDetailPager extends MenuDetailBasePager {
     public View initView() {
         View view = View.inflate(mContext, R.layout.tabdetail_pager, null);
         View topNewsView = View.inflate(mContext, R.layout.topnews, null);
-        viewpager = (ViewPager) topNewsView.findViewById(R.id.viewpager);
+        viewpager = (HorizontalSrollViewPager) topNewsView.findViewById(R.id.viewpager);
         tv_title = (TextView) topNewsView.findViewById(R.id.tv_title);
         ll_point_group = (LinearLayout) topNewsView.findViewById(R.id.ll_point_group);
-        listview = (ListView) view.findViewById(R.id.listview);
+        listview = (RefreshListView) view.findViewById(R.id.listview);
 
         //把顶部viewpager等添加到ListView表头
-        listview.addHeaderView(topNewsView);
+       // listview.addHeaderView(topNewsView);
+        //将下拉刷新和顶部轮播图结合成一个view添加到头部
+         listview.addTopNewsView(topNewsView);
+        //设置松开刷新监听方法
+        listview.setOnRefreshListener(new RefreshListView.OnRefreshListener() {
+            @Override
+            public void OnPullDownRefresh() {
+                //刷新=联网请求数据
+                getDataFromNet();
+            }
+
+            @Override
+            public void OnLoadMore() {
+                //Log.i("OnLoadMore","OnLoadMore");
+                if (TextUtils.isEmpty(moreUrl)) {
+                    Toast.makeText(mContext, "没有更多数据", Toast.LENGTH_SHORT).show();
+                    listview.onRefreshFinish(false);
+                } else {
+                    Toast.makeText(mContext, "更多数据", Toast.LENGTH_SHORT).show();
+
+                    getMoreDataFromNet(0);
+                }
+            }
+        });
 
         return view;
+    }
+
+    private void getMoreDataFromNet(int i) {
+        RequestParams params = new RequestParams(moreUrl);
+        x.http().get(params, new Callback.CommonCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                isLoadMore = true;
+                //解析并显示数据
+                processData(result);
+                listview.onRefreshFinish(true);
+            }
+
+            @Override
+            public void onError(Throwable ex, boolean isOnCallback) {
+                listview.onRefreshFinish(false);
+            }
+
+            @Override
+            public void onCancelled(CancelledException cex) {
+                //Log.i("onCancelled----", cex.getMessage());
+            }
+
+            @Override
+            public void onFinished() {
+
+                //Log.i("onFinished----", "onFinished");
+            }
+        });
     }
 
     @Override
     public void initData() {
         super.initData();
-        String url = Constants.BASE_URL + childrenData.getUrl();
+        url = Constants.BASE_URL + childrenData.getUrl();
         //取本地缓存数据
         String result = CacheUtil.getString(mContext, url);
         if (!TextUtils.isEmpty(result)) {
             processData(result);
         }
         //联网请求数据
-        getDataFromNet(url);
+        getDataFromNet();
 
     }
 
-    public void getDataFromNet(final String url) {
-        RequestParams params = new RequestParams();
+    public void getDataFromNet() {
+        RequestParams params = new RequestParams(url);
         x.http().get(params, new Callback.CommonCallback<String>() {
             @Override
             public void onSuccess(String result) {
@@ -106,59 +162,78 @@ public class TabDetailPager extends MenuDetailBasePager {
                 CacheUtil.putString(mContext, url, result);
                 //解析并显示数据
                 processData(result);
-                Log.i("onSuccess----", result);
+                //Log.i("onSuccess----", result);
+                //隐藏顶部下拉刷新控件(更新时间)
+                listview.onRefreshFinish(true);
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-                Log.i("onError----", ex.getMessage());
+                //Log.i("onError----", ex.getMessage());
+                //隐藏顶部下拉刷新控件
+                listview.onRefreshFinish(false);
             }
 
             @Override
             public void onCancelled(CancelledException cex) {
-                Log.i("onCancelled----", cex.getMessage());
+                //Log.i("onCancelled----", cex.getMessage());
             }
 
             @Override
             public void onFinished() {
-                Log.i("onFinished----", "onFinished");
+
+                //Log.i("onFinished----", "onFinished");
             }
         });
     }
 
     private void processData(String result) {
         TabDetailPagerBean bean = parsedJson(result);
-        topnews = bean.getData().getTopnews();
-        viewpager.setAdapter(new TabDetailPagerTopNewsAdapter());
-        tv_title.setText(topnews.get(prePosition).getTitle());
-        viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        if (TextUtils.isEmpty(bean.getData().getMore())) {
+            moreUrl = "";
+        } else {
+            moreUrl = Constants.BASE_URL + bean.getData().getMore();
+        }
+        if (!isLoadMore) {
+            //默认
+            topnews = bean.getData().getTopnews();
+            viewpager.setAdapter(new TabDetailPagerTopNewsAdapter());
+            tv_title.setText(topnews.get(prePosition).getTitle());
+            viewpager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-            }
+                }
 
-            @Override
-            public void onPageSelected(int position) {
-                tv_title.setText(topnews.get(position).getTitle());
-                //设置红点改变
-                ll_point_group.getChildAt(prePosition).setEnabled(false);
-                ll_point_group.getChildAt(position).setEnabled(true);
-                prePosition = position;
-            }
+                @Override
+                public void onPageSelected(int position) {
+                    tv_title.setText(topnews.get(position).getTitle());
+                    //设置红点改变
+                    ll_point_group.getChildAt(prePosition).setEnabled(false);
+                    ll_point_group.getChildAt(position).setEnabled(true);
+                    prePosition = position;
+                }
 
-            @Override
-            public void onPageScrollStateChanged(int state) {
+                @Override
+                public void onPageScrollStateChanged(int state) {
 
-            }
-        });
-        //因为该方法执行两次(本地,网络) 所以要先移除
-        ll_point_group.removeAllViews();
-        //添加红点
-        addPoint();
-        news = bean.getData().getNews();
-        //设置listview的适配器
-        listAdapter = new MyTabDetailPagerListAdapter();
-        listview.setAdapter(listAdapter);
+                }
+            });
+            //因为该方法执行两次(本地,网络) 所以要先移除
+            ll_point_group.removeAllViews();
+            //添加红点
+            addPoint();
+            news = bean.getData().getNews();
+            //设置listview的适配器
+            listAdapter = new MyTabDetailPagerListAdapter();
+            listview.setAdapter(listAdapter);
+        } else {
+            //加载更多处理逻辑
+            isLoadMore = false;
+            news.addAll(bean.getData().getNews());
+            listAdapter.notifyDataSetChanged();
+        }
+
 
     }
 
@@ -201,7 +276,7 @@ public class TabDetailPager extends MenuDetailBasePager {
             TabDetailPagerBean.DataEntity.NewsData newsData = news.get(position);
             String listimageurl = Constants.BASE_URL + newsData.getListimage();
             //请求图片
-            x.image().bind(viewHolder.iv_icon, listimageurl,imageOptions);
+            x.image().bind(viewHolder.iv_icon, listimageurl, imageOptions);
             viewHolder.tv_title.setText(newsData.getTitle());
             viewHolder.tv_time.setText(newsData.getPubdate());
             return convertView;
@@ -238,7 +313,7 @@ public class TabDetailPager extends MenuDetailBasePager {
             //获取图片地址
             TabDetailPagerBean.DataEntity.TopnewsData topnewsData = topnews.get(position);
             String topimageUrl = Constants.BASE_URL + topnewsData.getTopimage();
-            x.image().bind(imageView, topimageUrl);
+            x.image().bind(imageView, topimageUrl, imageOptions);
             return imageView;
         }
 

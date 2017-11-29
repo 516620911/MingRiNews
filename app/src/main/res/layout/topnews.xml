@@ -6,11 +6,11 @@
     android:layout_height="180dp"
     tools:showIn="@layout/tabdetail_pager">
 
-    <android.support.v4.view.ViewPager
+    <com.chenjunquan.mingrinews.view.HorizontalSrollViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="180dp">
-    </android.support.v4.view.ViewPager>
+    </com.chenjunquan.mingrinews.view.HorizontalSrollViewPager>
 
     <RelativeLayout
         android:layout_width="match_parent"

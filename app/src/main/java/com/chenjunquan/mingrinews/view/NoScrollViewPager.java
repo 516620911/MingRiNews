@@ -14,6 +14,7 @@ public class NoScrollViewPager extends ViewPager {
 
     /**
      * 通常是代码中实例化时使用的构造方法
+     *
      * @param context
      */
     public NoScrollViewPager(Context context) {
@@ -22,6 +23,7 @@ public class NoScrollViewPager extends ViewPager {
 
     /**
      * 布局文件实例化时使用这种两个参数的构造方法
+     *
      * @param context
      * @param attrs
      */
@@ -36,5 +38,10 @@ public class NoScrollViewPager extends ViewPager {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return true;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return false;
     }
 }
