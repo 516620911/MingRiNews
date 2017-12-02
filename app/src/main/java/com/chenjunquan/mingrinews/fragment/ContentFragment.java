@@ -50,7 +50,7 @@ public class ContentFragment extends BaseFragment {
 
     @Override
     public void initData() {
-        LogUtil.e("ContentFragmentinitData");
+        //LogUtil.e("ContentFragmentinitData");
         //添加页面到集合中
         mBasePagers = new ArrayList<>();
         mBasePagers.add(new HomePager(mContext));

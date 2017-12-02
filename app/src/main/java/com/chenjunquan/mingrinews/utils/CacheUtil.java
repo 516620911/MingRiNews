@@ -24,7 +24,7 @@ public class CacheUtil {
     }
     public static String getString(Context context, String key) {
         SharedPreferences sp = context.getSharedPreferences(String.valueOf(R.string.app_name), Context.MODE_PRIVATE);
-        return sp.getString(key, null);
+        return sp.getString(key, "");
     }
 
     public static void putString(Context context, String key, String value) {

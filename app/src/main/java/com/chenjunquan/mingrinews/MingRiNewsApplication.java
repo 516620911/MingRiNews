@@ -2,6 +2,8 @@ package com.chenjunquan.mingrinews;
 
 import android.app.Application;
 
+import com.chenjunquan.mingrinews.volley.VolleyManager;
+
 import org.xutils.x;
 
 /**
@@ -15,5 +17,7 @@ public class MingRiNewsApplication extends Application {
         super.onCreate();
         x.Ext.init(this);
         x.Ext.setDebug(true);
+        //初始化Volley
+        VolleyManager.init(this);
     }
 }

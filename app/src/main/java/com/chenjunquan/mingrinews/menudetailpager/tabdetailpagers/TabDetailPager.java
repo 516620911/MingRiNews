@@ -1,11 +1,18 @@
 package com.chenjunquan.mingrinews.menudetailpager.tabdetailpagers;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -13,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chenjunquan.mingrinews.R;
+import com.chenjunquan.mingrinews.activity.NewsDetailActivity;
 import com.chenjunquan.mingrinews.base.MenuDetailBasePager;
 import com.chenjunquan.mingrinews.domain.NewsCenterPagerBean;
 import com.chenjunquan.mingrinews.domain.TabDetailPagerBean;
@@ -54,7 +62,8 @@ public class TabDetailPager extends MenuDetailBasePager {
     private String url;
     private String moreUrl;
     private boolean isLoadMore = false;
-
+    private String READ_ARRAY_ID;
+    private boolean isDragging=false;
 
     public TabDetailPager(Context context, NewsCenterPagerBean.DataBean.ChildrenData childrenData) {
         super(context);
@@ -82,9 +91,9 @@ public class TabDetailPager extends MenuDetailBasePager {
         listview = (RefreshListView) view.findViewById(R.id.listview);
 
         //把顶部viewpager等添加到ListView表头
-       // listview.addHeaderView(topNewsView);
+        //listview.addHeaderView(topNewsView);
         //将下拉刷新和顶部轮播图结合成一个view添加到头部
-         listview.addTopNewsView(topNewsView);
+        listview.addTopNewsView(topNewsView);
         //设置松开刷新监听方法
         listview.setOnRefreshListener(new RefreshListView.OnRefreshListener() {
             @Override
@@ -104,6 +113,23 @@ public class TabDetailPager extends MenuDetailBasePager {
 
                     getMoreDataFromNet(0);
                 }
+            }
+        });
+        //已读功能 点击变灰
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int newsId = news.get(position - 1).getId();
+                String newsIds = CacheUtil.getString(mContext, READ_ARRAY_ID);
+                if (!newsIds.contains(newsId + "")) {
+                    CacheUtil.putString(mContext, READ_ARRAY_ID, newsIds + newsId + ",");
+                    listAdapter.notifyDataSetChanged();
+                }
+                TabDetailPagerBean.DataEntity.NewsData newsData = news.get(position - 1);
+                Intent intent = new Intent(mContext, NewsDetailActivity.class);
+                intent.putExtra("url", Constants.BASE_URL + newsData.getUrl());
+                mContext.startActivity(intent);
+
             }
         });
 
@@ -217,6 +243,25 @@ public class TabDetailPager extends MenuDetailBasePager {
                 @Override
                 public void onPageScrollStateChanged(int state) {
 
+                    switch (state) {
+                        //静止到拖拽
+                        case ViewPager.SCROLL_STATE_DRAGGING:
+                            isDragging=true;
+                            //拖拽中移除消息
+                            mHandler.removeCallbacksAndMessages(null);
+                            break;
+                        //静止
+                        case ViewPager.SCROLL_STATE_IDLE:
+
+                        //稳定下来
+                        case ViewPager.SCROLL_STATE_SETTLING:
+                            if(!isDragging){
+                                mHandler.removeCallbacksAndMessages(null);
+                                mHandler.sendEmptyMessageDelayed(0,4000);
+                            }
+                            isDragging=false;
+                            break;
+                    }
                 }
             });
             //因为该方法执行两次(本地,网络) 所以要先移除
@@ -233,9 +278,22 @@ public class TabDetailPager extends MenuDetailBasePager {
             news.addAll(bean.getData().getNews());
             listAdapter.notifyDataSetChanged();
         }
-
+        //顶部轮播图viewpager自动播放功能
+        mHandler.removeCallbacksAndMessages(null);
+        mHandler.sendEmptyMessageDelayed(0, 4000);
 
     }
+
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            int item = (viewpager.getCurrentItem() + 1) % topnews.size();
+            viewpager.setCurrentItem(item);
+            mHandler.sendEmptyMessageDelayed(0, 4000);
+            super.handleMessage(msg);
+        }
+    };
 
     static class ViewHolder {
         ImageView iv_icon;
@@ -279,6 +337,15 @@ public class TabDetailPager extends MenuDetailBasePager {
             x.image().bind(viewHolder.iv_icon, listimageurl, imageOptions);
             viewHolder.tv_title.setText(newsData.getTitle());
             viewHolder.tv_time.setText(newsData.getPubdate());
+            String newsIds = CacheUtil.getString(mContext, READ_ARRAY_ID);
+            if (newsIds.contains(newsData.getId() + "")) {
+                //设置灰色
+                viewHolder.tv_title.setTextColor(Color.GRAY);
+            } else {
+                //设置黑色
+                viewHolder.tv_title.setTextColor(Color.BLACK);
+            }
+
             return convertView;
         }
     }
@@ -302,6 +369,7 @@ public class TabDetailPager extends MenuDetailBasePager {
     }
 
     class TabDetailPagerTopNewsAdapter extends PagerAdapter {
+
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             ImageView imageView = new ImageView(mContext);
@@ -314,6 +382,23 @@ public class TabDetailPager extends MenuDetailBasePager {
             TabDetailPagerBean.DataEntity.TopnewsData topnewsData = topnews.get(position);
             String topimageUrl = Constants.BASE_URL + topnewsData.getTopimage();
             x.image().bind(imageView, topimageUrl, imageOptions);
+            imageView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            mHandler.removeCallbacksAndMessages(null);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            //滑动过后ACTION_UP没有执行 转而执行ACTION_CANCEL(被拖拽替代)
+                        /*case MotionEvent.ACTION_CANCEL:
+                            mHandler.removeCallbacksAndMessages(null);
+                            mHandler.sendEmptyMessageDelayed(0, 4000);
+                            break;*/
+                    }
+                    return true;
+                }
+            });
             return imageView;
         }
 

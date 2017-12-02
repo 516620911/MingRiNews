@@ -22,8 +22,11 @@
         </activity>
         <activity android:name=".activity.GuideActivity">
         </activity>
-        <activity android:name=".activity.MainActivity"
+        <activity
+            android:name=".activity.MainActivity"
             android:theme="@style/Theme.PageIndicatorDefaults">
+        </activity>
+        <activity android:name=".activity.NewsDetailActivity">
         </activity>
     </application>
 

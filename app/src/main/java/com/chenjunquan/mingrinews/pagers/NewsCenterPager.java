@@ -1,12 +1,19 @@
 package com.chenjunquan.mingrinews.pagers;
 
 import android.content.Context;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.StringRequest;
 import com.chenjunquan.mingrinews.activity.MainActivity;
 import com.chenjunquan.mingrinews.base.BasePager;
 import com.chenjunquan.mingrinews.base.MenuDetailBasePager;
@@ -18,6 +25,7 @@ import com.chenjunquan.mingrinews.menudetailpager.PhotosMenuDetailPager;
 import com.chenjunquan.mingrinews.menudetailpager.TopicMenuDetailPager;
 import com.chenjunquan.mingrinews.utils.CacheUtil;
 import com.chenjunquan.mingrinews.utils.Constants;
+import com.chenjunquan.mingrinews.volley.VolleyManager;
 import com.google.gson.Gson;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
@@ -28,6 +36,7 @@ import org.xutils.common.Callback;
 import org.xutils.http.RequestParams;
 import org.xutils.x;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +48,7 @@ import java.util.List;
 public class NewsCenterPager extends BasePager {
 
     private List<NewsCenterPagerBean.DataBean> mData;
+    private long startTime;
 
     public NewsCenterPager(Context context) {
         super(context);
@@ -65,9 +75,48 @@ public class NewsCenterPager extends BasePager {
             processData(result);
         }
         //向服务器请求数据
-        getDataFromNet();
+        //getDataFromNet();
+        //开机到当前毫秒值
+        startTime = SystemClock.uptimeMillis();
+        getDataFromNetByVolley();
 
 
+    }
+
+    private void getDataFromNetByVolley() {
+        //请求队列
+        //RequestQueue queue = Volley.newRequestQueue(mContext);
+
+        StringRequest request = new StringRequest(Request.Method.GET, Constants.NEWSCENTER_PAGER_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                long endTime = SystemClock.uptimeMillis();
+                long passTime = endTime - startTime;
+                Log.i("onResponse", passTime + "");
+                //缓存数据
+                CacheUtil.putString(mContext, Constants.NEWSCENTER_PAGER_URL, response);
+                processData(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.i("onErrorResponse", error.getMessage());
+            }
+        }) {
+            //解决乱码
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String parsed = new String(response.data, "UTF-8");
+                    return Response.success(parsed, HttpHeaderParser.parseCacheHeaders(response));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                return super.parseNetworkResponse(response);
+            }
+        };
+        //添加请求
+        VolleyManager.getRequestQueue().add(request);
     }
 
     public void getDataFromNet() {
@@ -117,8 +166,8 @@ public class NewsCenterPager extends BasePager {
         //添加详情页面
         mDetailBasePagers = new ArrayList<>();
         mDetailBasePagers.add(new NewsMenuDetailPager(mContext, mData.get(0)));
-        mDetailBasePagers.add(new TopicMenuDetailPager(mContext));
-        mDetailBasePagers.add(new PhotosMenuDetailPager(mContext));
+        mDetailBasePagers.add(new TopicMenuDetailPager(mContext, mData.get(0)));
+        mDetailBasePagers.add(new PhotosMenuDetailPager(mContext,mData.get(2)));
         mDetailBasePagers.add(new InteractMenuDetailPager(mContext));
 
         leftmenuFragment.setData(mData);
@@ -230,5 +279,19 @@ public class NewsCenterPager extends BasePager {
         View rootView = menuDetailBasePager.initView();
         menuDetailBasePager.initData();
         fl_content_content.addView(rootView);
+        if (position == 2) {
+            //图组详情页面
+            ib_swich_list_grid.setVisibility(View.VISIBLE);
+            ib_swich_list_grid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //得到图组详情页面对象
+                    PhotosMenuDetailPager detailPager = (PhotosMenuDetailPager) mDetailBasePagers.get(2);
+                    detailPager.switchListAndGrid(ib_swich_list_grid);
+                }
+            });
+        } else {
+            ib_swich_list_grid.setVisibility(View.GONE);
+        }
     }
 }

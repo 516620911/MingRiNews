@@ -37,7 +37,7 @@ public class LeftmenuFragment extends BaseFragment {
 
     @Override
     public View initView() {
-        LogUtil.e("LeftmenuFragmentinitView");
+        //LogUtil.e("LeftmenuFragmentinitView");
         listView = new ListView(mContext);
         listView.setPadding(0, DensityUtil.dip2px(mContext, 40), 0, 0);
         //设置分割线高度为0

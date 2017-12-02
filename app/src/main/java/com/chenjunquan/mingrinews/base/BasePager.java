@@ -26,6 +26,8 @@ public class BasePager {
     public ImageButton iv_menu;
     public FrameLayout fl_content_content;
     public ImageButton ib_menu;
+    public ImageButton ib_swich_list_grid;
+
     public BasePager(Context context) {
         mContext = context;
         //构造方法一执行就初始化视图
@@ -38,12 +40,13 @@ public class BasePager {
         tv_title = view.findViewById(R.id.tv_title);
         iv_menu = view.findViewById(R.id.ib_menu);
         fl_content_content = view.findViewById(R.id.fl_content_content);
-        ib_menu=view.findViewById(R.id.ib_menu);
+        ib_menu = view.findViewById(R.id.ib_menu);
+        ib_swich_list_grid = view.findViewById(R.id.ib_swich_list_grid);
         ib_menu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //关闭左侧菜单
-                MainActivity mainActivity= (MainActivity) mContext;
+                MainActivity mainActivity = (MainActivity) mContext;
                 //开关状态互换
                 mainActivity.getSlidingMenu().toggle();
             }
